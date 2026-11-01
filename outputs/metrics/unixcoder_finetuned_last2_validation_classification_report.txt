@@ -1,0 +1,10 @@
+unixcoder_finetuned_last2 - validation split (positive class = 1 = hallucinated)
+
+              precision    recall  f1-score   support
+
+     correct     0.7816    0.6892    0.7325       296
+hallucinated     0.7221    0.8074    0.7624       296
+
+    accuracy                         0.7483       592
+   macro avg     0.7518    0.7483    0.7474       592
+weighted avg     0.7518    0.7483    0.7474       592

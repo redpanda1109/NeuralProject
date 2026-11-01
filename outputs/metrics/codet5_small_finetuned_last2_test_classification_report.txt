@@ -1,0 +1,10 @@
+codet5_small_finetuned_last2 - test split (positive class = 1 = hallucinated)
+
+              precision    recall  f1-score   support
+
+     correct     0.7876    0.8142    0.8007       296
+hallucinated     0.8077    0.7804    0.7938       296
+
+    accuracy                         0.7973       592
+   macro avg     0.7976    0.7973    0.7972       592
+weighted avg     0.7976    0.7973    0.7972       592

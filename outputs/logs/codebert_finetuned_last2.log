@@ -26,3 +26,5 @@
 11:09:59 |   roc_auc      0.8184   0.8259  +0.0075
 11:09:59 |   pr_auc       0.8017   0.8065  +0.0047
 11:09:59 |   Run `python -m src.evaluation` for charts and confidence intervals.
+16:06:48 | codebert_finetuned_last2 already trained - skipping (use --force to retrain).
+16:50:05 | codebert_finetuned_last2 already trained - skipping (use --force to retrain).

@@ -1,0 +1,10 @@
+codet5_small_frozen - validation split (positive class = 1 = hallucinated)
+
+              precision    recall  f1-score   support
+
+     correct     0.7895    0.7095    0.7473       296
+hallucinated     0.7362    0.8108    0.7717       296
+
+    accuracy                         0.7601       592
+   macro avg     0.7628    0.7601    0.7595       592
+weighted avg     0.7628    0.7601    0.7595       592

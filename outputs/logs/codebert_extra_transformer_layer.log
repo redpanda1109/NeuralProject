@@ -1,0 +1,25 @@
+17:15:18 | ======================================================================
+17:15:18 | CodeBERT FROZEN + one NEW Transformer layer before the head
+17:15:18 | ======================================================================
+17:15:27 |   New Transformer layer and head initialised randomly.
+17:15:27 |   Pretrained CodeBERT : 124,055,040 params, trainable 0 (must be 0)
+17:15:27 |   New Transformer layer(s): 1 x 7,087,872 params  TRAINABLE
+17:15:27 |   Classification head : 393,729 params  TRAINABLE
+17:15:27 |   Trainable parameters: 7,481,601 | frozen parameters: 124,055,040
+17:15:27 |   Verification passed: CodeBERT is completely frozen; only the new layer + head train.
+17:15:32 |   train     : 2710 examples, mean length 456 tokens
+17:15:33 |   validation: 592 examples, mean length 472 tokens
+17:15:34 |   test      : 592 examples, mean length 462 tokens
+17:15:34 |   batch size 16 x accumulation 2 = effective 32 | mixed precision: True
+17:15:34 |   learning rates: new Transformer layer=0.0, head=0.0
+17:16:05 |   epoch   1 | train loss 0.6908 | val loss 0.6753 | val acc 0.5625 | 32s  <- best, checkpoint saved
+17:16:38 |   epoch   2 | train loss 0.6693 | val loss 0.6281 | val acc 0.6486 | 33s  <- best, checkpoint saved
+17:17:09 |   epoch   3 | train loss 0.5907 | val loss 0.5705 | val acc 0.6791 | 31s  <- best, checkpoint saved
+17:17:41 |   epoch   4 | train loss 0.5326 | val loss 0.5027 | val acc 0.7348 | 32s  <- best, checkpoint saved
+17:18:13 |   epoch   5 | train loss 0.4615 | val loss 0.5386 | val acc 0.7382 | 32s
+17:18:45 |   epoch   6 | train loss 0.4262 | val loss 0.4569 | val acc 0.7872 | 32s  <- best, checkpoint saved
+17:19:17 |   epoch   7 | train loss 0.4190 | val loss 0.4587 | val acc 0.7770 | 32s
+17:19:49 |   epoch   8 | train loss 0.3610 | val loss 0.4878 | val acc 0.7905 | 32s
+17:20:21 |   epoch   9 | train loss 0.3513 | val loss 0.4693 | val acc 0.7922 | 32s
+17:20:21 |   Early stopping: no validation improvement for 3 epochs.
+17:20:21 |   Loaded best checkpoint from epoch 6 (val loss 0.4569).

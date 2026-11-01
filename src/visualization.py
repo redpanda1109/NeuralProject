@@ -223,9 +223,12 @@ def plot_grouped_metrics(comparison_df, metrics, title, path):
 
 def plot_curves(curves, kind, path):
     """ROC or PR curves. `curves` = list of (display_name, x_values, y_values, auc)."""
+    if len(curves) > len(PALETTE):
+        raise ValueError(f"At most {len(PALETTE)} curves per chart (colours are never reused); "
+                         f"got {len(curves)}. Split them over several charts.")
     fig, ax = plt.subplots(figsize=(7, 6))
     for i, (name, xs, ys, auc) in enumerate(curves):
-        ax.plot(xs, ys, color=PALETTE[i % len(PALETTE)], linewidth=2, label=f"{name} (AUC {auc:.3f})")
+        ax.plot(xs, ys, color=PALETTE[i], linewidth=2, label=f"{name} (AUC {auc:.3f})")
     if kind == "roc":
         ax.plot([0, 1], [0, 1], color=AXIS_COLOR, linestyle="--", linewidth=1, label="Random guess")
         ax.set_xlabel("False positive rate")

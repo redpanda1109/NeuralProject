@@ -1,0 +1,43 @@
+17:10:13 | ======================================================================
+17:10:13 | PHASE 5 - unixcoder: fine-tune ONLY the final 2 encoder layers + head
+17:10:13 | ======================================================================
+17:10:21 |   Head initialised from the Phase 4 head: /content/drive/MyDrive/NeuralProject/outputs/models/unixcoder_frozen/head.pt
+17:10:21 |   Encoder: RobertaModel | layers at backbone.encoder.layer | 12 layers | unfrozen: the last 2 (layers 10-11)
+17:10:21 |     encoder.layer.0    7,087,872 params  frozen
+17:10:21 |     encoder.layer.1    7,087,872 params  frozen
+17:10:21 |     encoder.layer.2    7,087,872 params  frozen
+17:10:21 |     encoder.layer.3    7,087,872 params  frozen
+17:10:21 |     encoder.layer.4    7,087,872 params  frozen
+17:10:21 |     encoder.layer.5    7,087,872 params  frozen
+17:10:21 |     encoder.layer.6    7,087,872 params  frozen
+17:10:21 |     encoder.layer.7    7,087,872 params  frozen
+17:10:21 |     encoder.layer.8    7,087,872 params  frozen
+17:10:21 |     encoder.layer.9    7,087,872 params  frozen
+17:10:21 |     encoder.layer.10   7,087,872 params  TRAINABLE
+17:10:21 |     encoder.layer.11   7,087,872 params  TRAINABLE
+17:10:21 |   Trainable parameters: 14,569,473
+17:10:21 |   Frozen parameters   : 111,163,392
+17:10:21 |   Trainable blocks    : ['backbone.encoder.layer.10', 'backbone.encoder.layer.11', 'head']
+17:10:21 |   Verification passed: only the final layers + head are trainable; embeddings and earlier layers are frozen.
+17:10:25 |   train     : 2710 examples, mean length 434 tokens
+17:10:27 |   validation: 592 examples, mean length 459 tokens
+17:10:29 |   test      : 592 examples, mean length 434 tokens
+17:10:29 |   batch size 16 x accumulation 2 = effective 32 | mixed precision: True
+17:10:29 |   learning rates: unfrozen encoder layers=0.0, head=0.0
+17:11:04 |   epoch   1 | train loss 0.5613 | val loss 0.5819 | val acc 0.7061 | 35s  <- best, checkpoint saved
+17:11:39 |   epoch   2 | train loss 0.5553 | val loss 0.5560 | val acc 0.7213 | 35s  <- best, checkpoint saved
+17:12:13 |   epoch   3 | train loss 0.5395 | val loss 0.5386 | val acc 0.7483 | 34s  <- best, checkpoint saved
+17:12:47 |   epoch   4 | train loss 0.5151 | val loss 0.5304 | val acc 0.7483 | 35s  <- best, checkpoint saved
+17:13:21 |   epoch   5 | train loss 0.4874 | val loss 0.5820 | val acc 0.7078 | 34s
+17:13:55 |   epoch   6 | train loss 0.4621 | val loss 0.5363 | val acc 0.7416 | 34s
+17:14:29 |   epoch   7 | train loss 0.4481 | val loss 0.5554 | val acc 0.7382 | 34s
+17:14:29 |   Early stopping: no validation improvement for 3 epochs.
+17:14:29 |   Loaded best checkpoint from epoch 4 (val loss 0.5304).
+17:14:39 |   metric       frozen   last-2   change
+17:14:39 |   accuracy     0.6875   0.7399  +0.0524
+17:14:39 |   precision    0.6820   0.7165  +0.0345
+17:14:39 |   recall       0.7027   0.7939  +0.0912
+17:14:39 |   f1           0.6922   0.7532  +0.0610
+17:14:39 |   roc_auc      0.7445   0.8008  +0.0563
+17:14:39 |   pr_auc       0.6954   0.7642  +0.0688
+17:14:39 |   Run `python -m src.evaluation` for charts and confidence intervals.

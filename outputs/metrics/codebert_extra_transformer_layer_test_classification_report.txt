@@ -1,0 +1,10 @@
+codebert_extra_transformer_layer - test split (positive class = 1 = hallucinated)
+
+              precision    recall  f1-score   support
+
+     correct     0.7429    0.8007    0.7707       296
+hallucinated     0.7839    0.7230    0.7522       296
+
+    accuracy                         0.7618       592
+   macro avg     0.7634    0.7618    0.7615       592
+weighted avg     0.7634    0.7618    0.7615       592

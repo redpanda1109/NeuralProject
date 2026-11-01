@@ -18,8 +18,9 @@ completion an LLM proposed for that gap, decide whether the completion is
 
 **Research question.** *How well can models of increasing capacity detect code
 hallucinations, from TF-IDF + linear models to GRU/LSTM networks trained from
-scratch to pretrained code Transformers (CodeBERT, GraphCodeBERT)? And does adapting
-the final two Transformer layers help compared with a completely frozen encoder?*
+scratch to pretrained code Transformers (CodeBERT, GraphCodeBERT, CodeT5-small, UniXcoder)? And does
+adapting the final Transformer layers (two or four), or adding a new trainable Transformer layer, help
+compared with a completely frozen encoder?*
 
 ---
 
@@ -78,7 +79,7 @@ Prompts can be up to 22,650 characters, far more than a model can read, so we ke
 <language>  [END of the prompt]  [COMPLETION]  [START of the suffix]
 ```
 
-- Token budget: CodeBERT/GraphCodeBERT 512 tokens, RNN 400 tokens.
+- Token budget: CodeBERT/GraphCodeBERT/CodeT5-small/UniXcoder 512 tokens, RNN 400 tokens.
 - The completion is **always kept** (up to 160 / 128 tokens). The remaining budget is split 70% prompt / 30% suffix, and unused budget on one side goes to the other (`preprocessing.fit_to_budget`).
 - Neural models mark the completion tokens with a mask and **pool only over the completion**. The model reads the whole window, and then the hidden states of the completion tokens, which already "know" their context, are averaged and max-pooled.
 
@@ -112,11 +113,14 @@ NeuralProject/
 │   ├── training.py             shared PyTorch training loop, early stopping, completion pooling
 │   ├── rnn_models.py           PHASE 3  GRU / LSTM
 │   ├── pretrained_models.py    PHASE 4  frozen CodeBERT / GraphCodeBERT + head
-│   ├── finetuning.py           PHASE 5  unfreeze ONLY the final 2 layers
-│   ├── evaluation.py           PHASE 6  metrics, comparison table, answers
+│   ├── additional_pretrained_models.py  PHASE 4  frozen CodeT5-small / UniXcoder + head
+│   ├── finetuning.py           PHASE 5  unfreeze ONLY the final 2 layers (all 4 encoders)
+│   ├── more_finetuning_codebert.py      extra: CodeBERT last FOUR layers + head
+│   ├── adding_layers_codebert.py        extra: frozen CodeBERT + NEW Transformer layer + head
+│   ├── evaluation.py           PHASE 6  metrics, comparison table, answers, classification_report.md
 │   └── visualization.py        all plots
 ├── tests/smoke_test.py         tiny end-to-end check (temporary output folder)
-├── outputs/  figures/ metrics/ models/ logs/ features/
+├── outputs/  figures/ metrics/ models/ logs/ features/  classification_report.md
 ├── README.md  INSTRUCTIONS.md  requirements.txt  .gitignore
 ```
 
@@ -169,6 +173,30 @@ language-specific parsers for all 7 languages. We use it as a **sequence encoder
 input as CodeBERT. This is supported by Hugging Face but does not use the data-flow part, which
 the results should keep in mind.
 
+### Additional experiments (CodeT5-small, UniXcoder, more CodeBERT variants)
+
+| Model / experiment | Saved as | Encoder weights | What is trained |
+|---|---|---|---|
+| **CodeT5-small (frozen)** | `codet5_small_frozen` | all 6 encoder blocks frozen | head only |
+| **CodeT5-small (last 2 layers)** | `codet5_small_finetuned_last2` | shared embeddings + blocks 0–3 frozen | blocks 4–5 + `encoder.final_layer_norm` + head |
+| **UniXcoder (frozen)** | `unixcoder_frozen` | all 12 layers frozen | head only |
+| **UniXcoder (last 2 layers)** | `unixcoder_finetuned_last2` | embeddings + layers 0–9 frozen | layers 10–11 + head |
+| **CodeBERT (last 4 layers)** | `codebert_finetuned_last4` | embeddings + layers 0–7 frozen | layers 8–11 + head (~28.7M params) |
+| **CodeBERT (frozen + new Transformer layer)** | `codebert_extra_transformer_layer` | **all** CodeBERT weights frozen | one NEW Transformer layer (~7.1M) + head |
+
+- **Same pipeline.** All six reuse the saved split, the input window, completion pooling, the 2-layer head, early stopping on the validation loss and the evaluation of the existing models (`pretrained_models.py`, `finetuning.py`, `training.py`, `evaluation.py`). Nothing creates a new split.
+- **CodeT5-small** (`Salesforce/codet5-small`) is an encoder–decoder. Only its **encoder** is loaded (`T5EncoderModel`), since a classifier needs token representations, not generated text. Its layers are `encoder.block.0–5` (hidden size 512), not CodeBERT's `encoder.layer.*`. T5 layers normalise their *input*, so the last block's output is normalised by `encoder.final_layer_norm`, which is unfrozen together with blocks 4–5 (in CodeBERT the equivalent LayerNorm is inside layer 11). CodeT5 runs in **fp32**, because T5 models can overflow in fp16. Its encoder learning rate is 5e-5 instead of 2e-5 (`config.FINETUNE_MODEL_OVERRIDES`).
+- **UniXcoder** (`microsoft/unixcoder-base`) has CodeBERT's RoBERTa shape (12 layers, 768 hidden) and the same recipe. Following Microsoft's reference code, the input starts with the mode token `<s> <encoder-only> </s>` (bidirectional encoder mode).
+- **CodeBERT last 4 layers** (`src/more_finetuning_codebert.py`). Exactly the Phase 5 recipe with `n = 4`. Before training, it checks that the trainable layers are exactly 8, 9, 10 and 11, that the trainable parameter count equals those 4 layers plus the head, and that the embeddings are frozen.
+- **CodeBERT + new Transformer layer** (`src/adding_layers_codebert.py`). CodeBERT stays frozen, in eval mode and under `torch.no_grad()`. A fresh `nn.TransformerEncoderLayer` sits between the encoder output and the completion pooling. It has CodeBERT's layer shape (768 hidden, 12 heads, FFN 3072, GELU, post-LayerNorm, initialised with N(0, 0.02)) and uses CodeBERT's attention mask (`src_key_padding_mask = attention_mask == 0`). Only this layer and a new head are trained (LR 1e-4, `config.EXTRA_LAYER_CONFIG`). A guard refuses to train if any CodeBERT parameter is trainable.
+
+How the four kinds of Transformer experiment differ:
+
+- **frozen**: the pretrained encoder is a fixed feature extractor and only the head learns.
+- **partially fine-tuned (last 2)**: the top two pretrained layers adapt to the task.
+- **last 4**: more pretrained capacity adapts, with a higher risk of overfitting on 2.7k examples.
+- **added layer**: the pretrained weights stay untouched, and new task-specific attention is learned on top of them.
+
 ### Fine-tuning: why unfreeze only the final two layers?
 
 A Transformer's lower layers learn general patterns, such as syntax and which tokens belong
@@ -187,7 +215,9 @@ and split, and the head starts from the Phase 4 head. Before training,
 trainable blocks. It **refuses to train** if anything other than `encoder.layer.10`,
 `encoder.layer.11` and the head is trainable, or if any of those is frozen. The smoke test checks
 this guard by deliberately unfreezing a wrong layer. Full fine-tuning is intentionally not
-implemented.
+implemented. The same guard works for every encoder: it looks up where each model keeps its
+layers (`pretrained_models.encoder_layout`) instead of assuming CodeBERT's layer names, and prints a
+layer-by-layer frozen/TRAINABLE table.
 
 ---
 
@@ -209,6 +239,14 @@ predictions is listed as **unavailable**, never filled with made-up values. A "Y
 F1, accuracy **and** ROC-AUC to all improve, because F1 alone can be inflated by predicting
 everything as hallucinated (F1 = 0.67 on balanced data).
 
+**Classification reports of every model** are collected in `outputs/classification_report.md`
+(per-class precision, recall, F1, support and accuracy, plus the Task B reports). It is rebuilt from
+the saved test predictions by `python -m src.evaluation` (or `--classification-report-only`). Models
+without current predictions are listed as **Not yet evaluated**. The file starts with the **top two
+models by the primary metric: test F1 of the hallucinated class**, with ties broken by ROC-AUC
+(`config.PRIMARY_METRIC`). This is the metric the comparison already uses to pick the best model of each
+group. The last notebook cell shows those two reports.
+
 ---
 
 ## 8. Results
@@ -226,6 +264,12 @@ _Generated automatically by `python -m src.evaluation` from the saved test predi
 | CodeBERT (last 2 layers) | completed | 0.7449 | 0.7636 | 0.7095 | 0.7356 | 0.8259 | 0.8065 | 0.9003 | 0.7011 | 0.7690 |
 | GraphCodeBERT (frozen) | completed | 0.7399 | 0.7432 | 0.7331 | 0.7381 | 0.8180 | 0.7892 | 0.9206 | 0.7049 | 0.7685 |
 | GraphCodeBERT (last 2 layers) | completed | 0.7466 | 0.7786 | 0.6892 | 0.7312 | 0.8359 | 0.8045 | 0.9307 | 0.6920 | 0.7641 |
+| CodeT5-small (frozen) | completed | 0.7652 | 0.7698 | 0.7568 | 0.7632 | 0.8507 | 0.8051 | 0.9409 | 0.7318 | 0.7948 |
+| CodeT5-small (last 2 layers) | completed | 0.7973 | 0.8077 | 0.7804 | 0.7938 | 0.8730 | 0.8316 | 0.9341 | 0.7660 | 0.8222 |
+| UniXcoder (frozen) | completed | 0.6875 | 0.6820 | 0.7027 | 0.6922 | 0.7445 | 0.6954 | 0.9172 | 0.6608 | 0.7233 |
+| UniXcoder (last 2 layers) | completed | 0.7399 | 0.7165 | 0.7939 | 0.7532 | 0.8008 | 0.7642 | 0.9409 | 0.7246 | 0.7799 |
+| CodeBERT (last 4 layers) | completed | 0.7720 | 0.7927 | 0.7365 | 0.7636 | 0.8745 | 0.8664 | 0.9003 | 0.7276 | 0.7958 |
+| CodeBERT (frozen + new Transformer layer) | completed | 0.7618 | 0.7839 | 0.7230 | 0.7522 | 0.8635 | 0.8676 | 0.9172 | 0.7138 | 0.7860 |
 
 **Task B (4-class category, hallucinated completions only, test split):**
 
@@ -238,13 +282,18 @@ Positive class = 1 = hallucinated. All models are evaluated on the same untouche
 Each question compares the model with the best test F1 in each group. The verdict is
 'Yes' only if F1, accuracy AND ROC-AUC all improve, 'No' if none improve, otherwise 'Mixed'.
 1. **Did the RNN outperform the traditional baseline?** No. Best RNN: LSTM (F1 0.6231, accuracy 0.6588, ROC-AUC 0.6998) vs best baseline: Logistic Regression (F1 0.7481, accuracy 0.7213, ROC-AUC 0.7981). Differences: F1 -0.1250, accuracy -0.0625, ROC-AUC -0.0984. The 95% bootstrap F1 intervals do not overlap.
-2. **Did the pretrained model outperform the RNN?** Yes. Best pretrained model: CodeBERT (frozen) (F1 0.7459, accuracy 0.7365, ROC-AUC 0.8184) vs best RNN: LSTM (F1 0.6231, accuracy 0.6588, ROC-AUC 0.6998). Differences: F1 +0.1228, accuracy +0.0777, ROC-AUC +0.1186. The 95% bootstrap F1 intervals do not overlap.
+2. **Did the pretrained model outperform the RNN?** Yes. Best pretrained model: CodeT5-small (last 2 layers) (F1 0.7938, accuracy 0.7973, ROC-AUC 0.8730) vs best RNN: LSTM (F1 0.6231, accuracy 0.6588, ROC-AUC 0.6998). Differences: F1 +0.1707, accuracy +0.1385, ROC-AUC +0.1732. The 95% bootstrap F1 intervals do not overlap.
 3. **Did unfreezing the final two layers improve over the frozen encoder?**
    - codebert: Mixed (the metrics disagree). Best last-2-layers codebert: CodeBERT (last 2 layers) (F1 0.7356, accuracy 0.7449, ROC-AUC 0.8259) vs best frozen codebert: CodeBERT (frozen) (F1 0.7459, accuracy 0.7365, ROC-AUC 0.8184). Differences: F1 -0.0104, accuracy +0.0084, ROC-AUC +0.0075. The 95% bootstrap F1 intervals overlap, so the difference may not be reliable.
    - graphcodebert: Mixed (the metrics disagree). Best last-2-layers graphcodebert: GraphCodeBERT (last 2 layers) (F1 0.7312, accuracy 0.7466, ROC-AUC 0.8359) vs best frozen graphcodebert: GraphCodeBERT (frozen) (F1 0.7381, accuracy 0.7399, ROC-AUC 0.8180). Differences: F1 -0.0069, accuracy +0.0068, ROC-AUC +0.0180. The 95% bootstrap F1 intervals overlap, so the difference may not be reliable.
-4. **Best accuracy:** **GraphCodeBERT (last 2 layers)** (accuracy = 0.7466)
+   - codet5_small: Yes. Best last-2-layers codet5_small: CodeT5-small (last 2 layers) (F1 0.7938, accuracy 0.7973, ROC-AUC 0.8730) vs best frozen codet5_small: CodeT5-small (frozen) (F1 0.7632, accuracy 0.7652, ROC-AUC 0.8507). Differences: F1 +0.0306, accuracy +0.0321, ROC-AUC +0.0223. The 95% bootstrap F1 intervals overlap, so the difference may not be reliable.
+   - unixcoder: Yes. Best last-2-layers unixcoder: UniXcoder (last 2 layers) (F1 0.7532, accuracy 0.7399, ROC-AUC 0.8008) vs best frozen unixcoder: UniXcoder (frozen) (F1 0.6922, accuracy 0.6875, ROC-AUC 0.7445). Differences: F1 +0.0610, accuracy +0.0524, ROC-AUC +0.0563. The 95% bootstrap F1 intervals do not overlap.
+4. **Best accuracy:** **CodeT5-small (last 2 layers)** (accuracy = 0.7973)
 5. **Best recall for hallucinated code:** **Logistic Regression** (recall = 0.8277)
-6. **Best F1-score:** **Logistic Regression** (f1 = 0.7481)
+6. **Best F1-score:** **CodeT5-small (last 2 layers)** (f1 = 0.7938)
+Additional CodeBERT experiments:
+7. **Did unfreezing the last FOUR layers improve over the last two?** Yes. Best last-4-layers CodeBERT: CodeBERT (last 4 layers) (F1 0.7636, accuracy 0.7720, ROC-AUC 0.8745) vs best last-2-layers CodeBERT: CodeBERT (last 2 layers) (F1 0.7356, accuracy 0.7449, ROC-AUC 0.8259). Differences: F1 +0.0280, accuracy +0.0270, ROC-AUC +0.0487. The 95% bootstrap F1 intervals overlap, so the difference may not be reliable.
+8. **Did adding a new Transformer layer on top of frozen CodeBERT improve over the frozen encoder + head?** Yes. Best frozen CodeBERT + new layer: CodeBERT (frozen + new Transformer layer) (F1 0.7522, accuracy 0.7618, ROC-AUC 0.8635) vs best frozen CodeBERT: CodeBERT (frozen) (F1 0.7459, accuracy 0.7365, ROC-AUC 0.8184). Differences: F1 +0.0063, accuracy +0.0253, ROC-AUC +0.0452. The 95% bootstrap F1 intervals overlap, so the difference may not be reliable.
 
 Figures: `outputs/figures/comparison_*.png`, `frozen_vs_finetuned_*.png`, `confusion_matrix_*.png`, `loss_curve_*.png`.
 <!-- RESULTS-END -->
@@ -259,6 +308,7 @@ Figures: `outputs/figures/comparison_*.png`, `frozen_vs_finetuned_*.png`, `confu
 - **Length shortcut.** Hallucinated completions are usually longer, so part of what any model learns may be length, not meaning.
 - **Context window.** Models see at most ~512 tokens around the gap. A hallucination that is only detectable from code far away (e.g. an import at the top of a long file) can be missed.
 - **GraphCodeBERT** is used without its data-flow-graph input.
+- **CodeT5-small** is used through its encoder only (no decoder), and **UniXcoder** only in its `<encoder-only>` mode.
 - **Threshold fixed at 0.5**, which favours neither precision nor recall. A different operating point could be chosen on validation data.
 - Some language × category cells are small (Python × parameter: 22 items).
 

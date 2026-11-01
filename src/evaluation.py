@@ -14,9 +14,16 @@ Two kinds of functions live here:
    real model outputs. A model without a test-prediction file is marked
    "unavailable" - no values are ever invented.
 
+3. The classification reports of EVERY model -> outputs/classification_report.md
+       python -m src.evaluation                            # also writes the report
+       python -m src.evaluation --classification-report-only
+   Rebuilt from the saved test predictions each time, so it is always reproducible.
+   Models without (current) test predictions are listed as "Not yet evaluated".
+
 Positive class: 1 = HALLUCINATED, for every model and every metric.
 """
 
+import argparse
 from pathlib import Path
 
 import numpy as np
@@ -30,6 +37,13 @@ from src import visualization as viz
 from src.utils import ensure_output_dirs, markdown_table, save_json
 
 METRICS = ["accuracy", "precision", "recall", "f1", "roc_auc", "pr_auc"]
+
+# Encoders that have both a frozen (Phase 4) and a last-2-layers (Phase 5) experiment.
+FROZEN_FINETUNED_PAIRS = {"codebert": "CodeBERT", "graphcodebert": "GraphCodeBERT",
+                          "codet5_small": "CodeT5-small", "unixcoder": "UniXcoder"}
+# All CodeBERT variants, compared in one extra chart.
+CODEBERT_VARIANTS = ["codebert_frozen", "codebert_extra_transformer_layer",
+                     "codebert_finetuned_last2", "codebert_finetuned_last4"]
 
 
 # ---------------------------------------------------------------------------
@@ -133,19 +147,31 @@ def report_model(model_name, splits=("validation", "test")):
 # ---------------------------------------------------------------------------
 # Final comparison of all models
 # ---------------------------------------------------------------------------
+def current_test_ids():
+    return set(pd.read_csv(config.PROCESSED_DIR / "test.csv", usecols=["benchmark_id"])["benchmark_id"])
+
+
+def load_test_predictions(model_name, test_ids=None):
+    """
+    (predictions, status) for one model. status is None when the saved test predictions
+    exist AND belong to the current test split; otherwise a short explanation.
+    """
+    test_ids = current_test_ids() if test_ids is None else test_ids
+    path = prediction_path(model_name, "test")
+    if not path.exists():
+        return None, "unavailable (not trained / no test predictions)"
+    predictions = pd.read_csv(path)
+    if set(predictions["pair_id"]) != test_ids or len(predictions) != 2 * len(test_ids):
+        return None, "stale (predicted on a different test split - retrain with --force)"
+    return predictions, None
+
+
 def build_comparison_table():
     rows, per_category = [], {}
-    test_ids = set(pd.read_csv(config.PROCESSED_DIR / "test.csv", usecols=["benchmark_id"])["benchmark_id"])
+    test_ids = current_test_ids()
     for model_name, display_name in config.MODEL_DISPLAY_NAMES.items():
-        path = prediction_path(model_name, "test")
         row = {"model": model_name, "display_name": display_name}
-        predictions = pd.read_csv(path) if path.exists() else None
-        if predictions is None:
-            status = "unavailable (not trained / no test predictions)"
-        elif set(predictions["pair_id"]) != test_ids or len(predictions) != 2 * len(test_ids):
-            status = "stale (predicted on a different test split - retrain with --force)"
-        else:
-            status = None
+        predictions, status = load_test_predictions(model_name, test_ids)
         if status:
             row.update({"status": status})
             row.update({m: np.nan for m in METRICS + ["pairwise_accuracy", "f1_ci_low", "f1_ci_high"]})
@@ -203,8 +229,7 @@ def _compare(table, group_a, group_b, label_a, label_b):
 def write_answers(table):
     baselines = ["logistic_regression", "linear_svm"]
     rnns = ["gru", "lstm"]
-    pretrained = ["codebert_frozen", "codebert_finetuned_last2",
-                  "graphcodebert_frozen", "graphcodebert_finetuned_last2"]
+    pretrained = [m for m in config.MODEL_DISPLAY_NAMES if m not in baselines + rnns]
     answers = [
         "# Final comparison - answers generated from saved test predictions",
         "",
@@ -218,7 +243,7 @@ def write_answers(table):
         f"{_compare(table, rnns, pretrained, 'RNN', 'pretrained model')}",
     ]
     q3 = []
-    for prefix in ["codebert", "graphcodebert"]:
+    for prefix in FROZEN_FINETUNED_PAIRS:
         q3.append(f"   - {prefix}: " + _compare(table, [f"{prefix}_frozen"], [f"{prefix}_finetuned_last2"],
                                                 f"frozen {prefix}", f"last-2-layers {prefix}"))
     answers += ["3. **Did unfreezing the final two layers improve over the frozen encoder?**"] + q3
@@ -226,6 +251,13 @@ def write_answers(table):
         f"4. **Best accuracy:** {_best(table, 'accuracy') or 'no completed models'}",
         f"5. **Best recall for hallucinated code:** {_best(table, 'recall') or 'no completed models'}",
         f"6. **Best F1-score:** {_best(table, 'f1') or 'no completed models'}",
+        "",
+        "Additional CodeBERT experiments:",
+        "",
+        f"7. **Did unfreezing the last FOUR layers improve over the last two?** "
+        f"{_compare(table, ['codebert_finetuned_last2'], ['codebert_finetuned_last4'], 'last-2-layers CodeBERT', 'last-4-layers CodeBERT')}",
+        f"8. **Did adding a new Transformer layer on top of frozen CodeBERT improve over the frozen encoder + head?** "
+        f"{_compare(table, ['codebert_frozen'], ['codebert_extra_transformer_layer'], 'frozen CodeBERT', 'frozen CodeBERT + new layer')}",
         "",
         "## Results table",
         "",
@@ -246,24 +278,35 @@ def make_comparison_figures(table, category_table):
     viz.plot_grouped_metrics(completed, ["accuracy", "precision", "recall", "f1"],
                              "All metrics on the test set (positive class = hallucinated)",
                              config.FIGURES_DIR / "comparison_all_metrics.png")
-    for prefix, label in [("codebert", "CodeBERT"), ("graphcodebert", "GraphCodeBERT")]:
+    for prefix, label in FROZEN_FINETUNED_PAIRS.items():
         pair = completed[completed["model"].isin([f"{prefix}_frozen", f"{prefix}_finetuned_last2"])]
         if len(pair) == 2:
             viz.plot_grouped_metrics(pair, ["accuracy", "precision", "recall", "f1", "roc_auc"],
                                      f"{label}: frozen encoder vs final 2 layers unfrozen",
                                      config.FIGURES_DIR / f"frozen_vs_finetuned_{prefix}.png")
+    variants = completed[completed["model"].isin(CODEBERT_VARIANTS)]
+    if len(variants) >= 2:
+        viz.plot_grouped_metrics(variants, ["accuracy", "precision", "recall", "f1", "roc_auc"],
+                                 "CodeBERT: frozen vs last 2 / last 4 layers vs new Transformer layer",
+                                 config.FIGURES_DIR / "codebert_variants.png")
     if not category_table.empty:
         viz.plot_per_category(category_table, "Detection rate per hallucination category (test set)",
                               config.FIGURES_DIR / "comparison_recall_by_category.png")
-    roc_curves, pr_curves = [], []
-    for _, row in completed.iterrows():
-        predictions = pd.read_csv(prediction_path(row["model"], "test"))
-        fpr, tpr, _ = roc_curve(predictions["label"], predictions["score"])
-        precision, recall, _ = precision_recall_curve(predictions["label"], predictions["score"])
-        roc_curves.append((row["display_name"], fpr, tpr, row["roc_auc"]))
-        pr_curves.append((row["display_name"], recall, precision, row["pr_auc"]))
-    viz.plot_curves(roc_curves, "roc", config.FIGURES_DIR / "comparison_roc_curves.png")
-    viz.plot_curves(pr_curves, "pr", config.FIGURES_DIR / "comparison_pr_curves.png")
+    # At most 8 curves per chart (one fixed colour each, never cycled): the original 8
+    # models keep their chart and colours; the additional experiments get their own.
+    original = list(config.MODEL_DISPLAY_NAMES)[:8]
+    for models, suffix in [(original, ""), ([m for m in config.MODEL_DISPLAY_NAMES if m not in original],
+                                            "_additional")]:
+        roc_curves, pr_curves = [], []
+        for _, row in completed[completed["model"].isin(models)].iterrows():
+            predictions = pd.read_csv(prediction_path(row["model"], "test"))
+            fpr, tpr, _ = roc_curve(predictions["label"], predictions["score"])
+            precision, recall, _ = precision_recall_curve(predictions["label"], predictions["score"])
+            roc_curves.append((row["display_name"], fpr, tpr, row["roc_auc"]))
+            pr_curves.append((row["display_name"], recall, precision, row["pr_auc"]))
+        if roc_curves:
+            viz.plot_curves(roc_curves, "roc", config.FIGURES_DIR / f"comparison_roc_curves{suffix}.png")
+            viz.plot_curves(pr_curves, "pr", config.FIGURES_DIR / f"comparison_pr_curves{suffix}.png")
 
 
 def update_readme_results(table):
@@ -304,6 +347,178 @@ def update_readme_results(table):
     print(f"README results section updated -> {readme}")
 
 
+# ---------------------------------------------------------------------------
+# Classification reports of every model -> outputs/classification_report.md
+# ---------------------------------------------------------------------------
+RUN_COMMANDS = {
+    "logistic_regression": "python -m src.baseline_models",
+    "linear_svm": "python -m src.baseline_models",
+    "gru": "python -m src.rnn_models --model gru",
+    "lstm": "python -m src.rnn_models --model lstm",
+    "codebert_frozen": "python -m src.pretrained_models --model codebert",
+    "codebert_finetuned_last2": "python -m src.finetuning --model codebert",
+    "graphcodebert_frozen": "python -m src.pretrained_models --model graphcodebert",
+    "graphcodebert_finetuned_last2": "python -m src.finetuning --model graphcodebert",
+    "codet5_small_frozen": "python -m src.additional_pretrained_models --model codet5_small",
+    "codet5_small_finetuned_last2": "python -m src.finetuning --model codet5_small",
+    "unixcoder_frozen": "python -m src.additional_pretrained_models --model unixcoder",
+    "unixcoder_finetuned_last2": "python -m src.finetuning --model unixcoder",
+    "codebert_finetuned_last4": "python -m src.more_finetuning_codebert",
+    "codebert_extra_transformer_layer": "python -m src.adding_layers_codebert",
+}
+
+
+def classification_report_text(predictions):
+    """sklearn classification report with the project's label names (0 = correct, 1 = hallucinated)."""
+    return classification_report(predictions["label"], predictions["pred"], labels=[0, 1],
+                                 target_names=[config.LABEL_NAMES[0], config.LABEL_NAMES[1]],
+                                 digits=4, zero_division=0)
+
+
+def evaluated_models():
+    """
+    One row per model with CURRENT saved test predictions (stale/missing ones excluded),
+    sorted by the primary metric (config.PRIMARY_METRIC, test F1 of the hallucinated
+    class), ties broken by ROC-AUC. Nothing is retrained - only saved files are read.
+    """
+    rows, test_ids = [], current_test_ids()
+    for model_name, display_name in config.MODEL_DISPLAY_NAMES.items():
+        predictions, status = load_test_predictions(model_name, test_ids)
+        if status:
+            continue
+        metrics = compute_binary_metrics(predictions["label"], predictions["score"], predictions["pred"])
+        rows.append({"model": model_name, "display_name": display_name, **metrics})
+    columns = ["model", "display_name"] + METRICS + ["macro_f1"]
+    table = pd.DataFrame(rows, columns=columns)
+    return table.sort_values([config.PRIMARY_METRIC, config.PRIMARY_METRIC_TIEBREAK],
+                             ascending=False, kind="stable").reset_index(drop=True)
+
+
+def top_models(k=2):
+    """The k best evaluated models by the primary metric (fewer if fewer are evaluated)."""
+    return evaluated_models().head(k)
+
+
+def _setup_type(model_name):
+    return config.MODEL_TRAINING_SETUP.get(model_name, "").split(" - ")[0] or "n/a"
+
+
+def write_classification_reports(path=None):
+    """Write outputs/classification_report.md from the saved test predictions."""
+    ensure_output_dirs()
+    path = Path(path or config.OUTPUT_DIR / "classification_report.md")
+    test_ids = current_test_ids()
+    ranking = evaluated_models()
+    n_items = len(test_ids)
+    metric, tiebreak = config.PRIMARY_METRIC, config.PRIMARY_METRIC_TIEBREAK
+    lines = [
+        "# Classification reports - all models and experiments",
+        "",
+        "_Generated automatically by `python -m src.evaluation` (or "
+        "`python -m src.evaluation --classification-report-only`) from the saved test predictions in "
+        "`outputs/metrics/predictions/`. Do not edit by hand - re-run the command after training more models._",
+        "",
+        f"- **Task:** binary detection. Label **0 = correct** (golden completion), **1 = hallucinated** "
+        f"(hallucinated completion); the positive class is 1 = hallucinated.",
+        f"- **Test set:** the saved split `data/processed/test.csv` ({n_items} benchmark items = "
+        f"{2 * n_items} binary examples, 50% per class). It is never used for training, tuning or early stopping.",
+        "- **Predictions:** exactly as saved by each model (neural models: probability >= 0.5; "
+        "Linear SVM: decision value >= 0).",
+        "- A model is **Not yet evaluated** when it has no saved test predictions for the current split; "
+        "no values are filled in for it.",
+        "",
+        "## Summary - top two models",
+        "",
+        f"**Primary metric: test F1-score of the hallucinated class (`{metric}`), ties broken by "
+        f"ROC-AUC (`{tiebreak}`).** This is the metric the project's comparison already uses "
+        "(`comparison_summary.md` picks the best model of each group by test F1). For a detector, "
+        "F1 of the positive class balances precision (how many flagged completions really are "
+        "hallucinated) and recall (how many hallucinations are caught). F1 alone can be inflated by "
+        "predicting everything as hallucinated (F1 = 0.67 on this balanced test set), so accuracy "
+        "and ROC-AUC are shown next to it.",
+        "",
+    ]
+    if ranking.empty:
+        lines += ["No model has been evaluated yet.", ""]
+    else:
+        top = ranking.head(2)
+        summary_rows, intervals = [], []
+        for rank, row in enumerate(top.itertuples(index=False), start=1):
+            predictions, _ = load_test_predictions(row.model, test_ids)
+            low, high = bootstrap_f1_interval(predictions)
+            intervals.append((low, high))
+            summary_rows.append({"rank": rank, "model": row.display_name, "type": _setup_type(row.model),
+                                 "f1": row.f1, "accuracy": row.accuracy, "roc_auc": row.roc_auc,
+                                 "f1_95%_CI": f"[{low:.4f}, {high:.4f}]"})
+        lines += [markdown_table(pd.DataFrame(summary_rows), index=False, float_format="{:.4f}"), ""]
+        if len(top) == 2:
+            (low_1, high_1), (low_2, high_2) = intervals
+            overlap = not (low_1 > high_2 or low_2 > high_1)
+            lines += [f"The two best models by test F1 are **{top.iloc[0]['display_name']}** and "
+                      f"**{top.iloc[1]['display_name']}**. Their 95% bootstrap F1 intervals "
+                      + ("overlap, so the order between them is not reliable" if overlap
+                         else "do not overlap") +
+                      f" (test set of {n_items} items; intervals of all models are in "
+                      "`outputs/metrics/model_comparison.csv`).", ""]
+        else:
+            lines += ["Only one model has been evaluated so far.", ""]
+
+    lines += ["## Overview", ""]
+    overview = []
+    ranks = {m: i + 1 for i, m in enumerate(ranking["model"])}
+    for model_name, display_name in config.MODEL_DISPLAY_NAMES.items():
+        _, status = load_test_predictions(model_name, test_ids)
+        row = ranking[ranking["model"] == model_name]
+        overview.append({
+            "model": display_name, "type": _setup_type(model_name),
+            "status": "Evaluated" if status is None else ("Not yet evaluated" if status.startswith("unavailable")
+                                                         else "Not yet evaluated (stale predictions)"),
+            "rank by F1": ranks.get(model_name, "-"),
+            "f1": float(row["f1"].iloc[0]) if len(row) else float("nan"),
+            "accuracy": float(row["accuracy"].iloc[0]) if len(row) else float("nan"),
+        })
+    lines += [markdown_table(pd.DataFrame(overview), index=False, float_format="{:.4f}"), ""]
+
+    lines += ["## Binary task - classification report of every model (test set)", ""]
+    for number, (model_name, display_name) in enumerate(config.MODEL_DISPLAY_NAMES.items(), start=1):
+        predictions, status = load_test_predictions(model_name, test_ids)
+        lines += [f"### {number}. {display_name} (`{model_name}`)", "",
+                  f"- **Setup:** {config.MODEL_TRAINING_SETUP.get(model_name, 'n/a')}"]
+        if status:
+            reason = ("no saved test predictions" if status.startswith("unavailable")
+                      else "saved predictions belong to a different test split")
+            lines += [f"- **Status: Not yet evaluated** ({reason}: "
+                      f"`outputs/metrics/predictions/{model_name}_test.csv`).",
+                      f"- Run: `{RUN_COMMANDS.get(model_name, 'see INSTRUCTIONS.md')}`, then "
+                      "`python -m src.evaluation`.", ""]
+            continue
+        lines += [f"- **Status:** Evaluated - {len(predictions)} test examples, "
+                  f"rank {ranks[model_name]} of {len(ranking)} by test F1.", "",
+                  "```text", classification_report_text(predictions).rstrip(), "```", ""]
+
+    lines += ["## Task B (4-class hallucination category) - separate task, not ranked above", "",
+              "Only hallucinated completions; labels = the four hallucination types. Shown for "
+              "completeness because these baselines are also part of the project.", ""]
+    for kind in ["logistic_regression", "linear_svm"]:
+        task_b_path = config.PREDICTIONS_DIR / f"taskB_{kind}_test.csv"
+        lines += [f"### Task B - {config.MODEL_DISPLAY_NAMES[kind]} (`taskB_{kind}`)", ""]
+        if not task_b_path.exists():
+            lines += ["- **Status: Not yet evaluated** (run `python -m src.baseline_models --task b`).", ""]
+            continue
+        task_b = pd.read_csv(task_b_path)
+        if set(task_b["pair_id"]) != test_ids:
+            lines += ["- **Status: Not yet evaluated** (stale predictions - retrain with `--force`).", ""]
+            continue
+        report = classification_report(task_b["label"], task_b["pred"], labels=list(range(len(config.CATEGORY_NAMES))),
+                                       target_names=config.CATEGORY_NAMES, digits=4, zero_division=0)
+        lines += [f"- **Status:** Evaluated - {len(task_b)} hallucinated test completions.", "",
+                  "```text", report.rstrip(), "```", ""]
+
+    path.write_text("\n".join(lines), encoding="utf-8")
+    print(f"Classification reports saved -> {path}")
+    return path
+
+
 def run_comparison():
     ensure_output_dirs()
     print("=" * 70)
@@ -319,8 +534,16 @@ def run_comparison():
     make_comparison_figures(table, category_table)
     write_answers(table)
     update_readme_results(table)
+    write_classification_reports()
     return table
 
 
 if __name__ == "__main__":
-    run_comparison()
+    parser = argparse.ArgumentParser(description="Phase 6: compare all models from saved predictions.")
+    parser.add_argument("--classification-report-only", action="store_true",
+                        help="only (re)write outputs/classification_report.md")
+    args = parser.parse_args()
+    if args.classification_report_only:
+        write_classification_reports()
+    else:
+        run_comparison()

@@ -37,6 +37,15 @@
 | 13 | Phase 6 – evaluation and comparison of all models | < 1 min |
 | 14 | Show comparison graphs + answers | — |
 | 15 | Download `outputs.zip` (only needed if the project is NOT on Drive) | — |
+| 16a | Frozen CodeT5-small + frozen UniXcoder | 3–6 min |
+| 16b | CodeT5-small, then UniXcoder, with the last 2 layers unfrozen | 5–10 min + 10–25 min |
+| 16c | CodeBERT with the last 4 layers unfrozen | 15–30 min |
+| 16d | Frozen CodeBERT + new Transformer layer | 10–20 min |
+| 16e | Re-run the evaluation; show charts and `outputs/classification_report.md` | < 1 min |
+| 17 | Classification reports of the top two models (chosen from the saved predictions) | — |
+
+Section 16 is new. If the earlier cells were already run in a previous session, run cells 1–4 and then
+jump to 16a. The times are estimates and have not been measured.
 
 **If Colab disconnects:** run cells 1–4 again, then continue where you stopped.
 Finished steps are detected from their saved files and **skipped automatically**.
@@ -71,11 +80,18 @@ Phases 4–5 also run on a CPU but are slow. Fine-tuning CodeBERT on a CPU takes
 | 6. Frozen GraphCodeBERT | `python -m src.pretrained_models --model graphcodebert` | `outputs/models/graphcodebert_frozen/` |
 | 7. Fine-tune last 2 CodeBERT layers | `python -m src.finetuning --model codebert` | `outputs/models/codebert_finetuned_last2/` |
 | 7b. (optional) same for GraphCodeBERT | `python -m src.finetuning --model graphcodebert` | `outputs/models/graphcodebert_finetuned_last2/` |
-| 8. Evaluate + all graphs | `python -m src.evaluation` | `outputs/metrics/model_comparison.csv`, `outputs/metrics/comparison_summary.md`, `outputs/figures/comparison_*.png` |
+| 7c. Frozen CodeT5-small + UniXcoder | `python -m src.additional_pretrained_models` (`--model codet5_small` / `unixcoder`) | `outputs/models/{codet5_small,unixcoder}_frozen/` |
+| 7d. Fine-tune last 2 layers of CodeT5-small / UniXcoder | `python -m src.finetuning --model codet5_small`, `python -m src.finetuning --model unixcoder` | `outputs/models/{codet5_small,unixcoder}_finetuned_last2/` |
+| 7e. CodeBERT, last 4 layers | `python -m src.more_finetuning_codebert` | `outputs/models/codebert_finetuned_last4/` |
+| 7f. Frozen CodeBERT + new Transformer layer | `python -m src.adding_layers_codebert` | `outputs/models/codebert_extra_transformer_layer/` |
+| 8. Evaluate + all graphs | `python -m src.evaluation` | `outputs/metrics/model_comparison.csv`, `outputs/metrics/comparison_summary.md`, `outputs/figures/comparison_*.png`, `outputs/classification_report.md` |
 
 Useful options:
 
-- `--force` for steps 3–7 retrains even if results already exist.
+- `--force` for steps 3–7f retrains even if results already exist.
+- `python -m src.more_finetuning_codebert --check-only` and `python -m src.adding_layers_codebert --check-only` only load CodeBERT and print/verify the frozen and trainable parameters, without training.
+- `python -m src.additional_pretrained_models --describe` prints the layer structure of CodeT5-small and UniXcoder.
+- `python -m src.evaluation --classification-report-only` rewrites only `outputs/classification_report.md`.
 - `python -m src.rnn_models --model gru` (or `lstm`) trains only one RNN.
 - `python -m src.baseline_models --task a` runs only the binary task; `--task b` runs only the 4-class task.
 - `python -m src.pretrained_models --model both` runs CodeBERT and GraphCodeBERT.
@@ -100,6 +116,7 @@ Per-model figures (confusion matrices, loss curves) are created when each model 
 ```bash
 python tests/smoke_test.py                 # includes CodeBERT (downloads ~500 MB once)
 python tests/smoke_test.py --skip-pretrained
+python tests/smoke_test.py --skip-additional   # skip CodeT5-small / UniXcoder / extra CodeBERT checks
 ```
 
 It trains on a tiny subset and writes to a temporary folder, so it never touches `outputs/`.
@@ -131,7 +148,10 @@ outputs/
 | `CUDA available: False` on Colab | `Runtime -> Change runtime type -> T4 GPU`, then restart from cell 1. |
 | `CUDA out of memory` | `Runtime -> Restart session` and run only the step you need. You can also lower `batch_size` in `src/config.py` (`FINETUNE_CONFIG`: 16 -> 8 and `grad_accumulation_steps`: 2 -> 4 keeps the effective batch size at 32). |
 | `Could not load 'microsoft/codebert-base'` | No internet, or Hugging Face is down. Check the connection and retry. |
-| `Wrong layers are trainable/frozen - refusing to train` | The layer-check safety guard fired. Make sure `UNFREEZE_LAST_N_LAYERS = 2` in `src/config.py` and that the code in `unfreeze_last_n_layers` was not modified. |
+| `Wrong layers are trainable/frozen - refusing to train` | The layer-check safety guard fired. Make sure `UNFREEZE_LAST_N_LAYERS = 2` (and `UNFREEZE_LAST_N_LAYERS_EXTENDED = 4`) in `src/config.py` and that the code in `unfreeze_last_n_layers` was not modified. |
+| `Wrong parameters are trainable/frozen` in `adding_layers_codebert` | Some CodeBERT parameter was unfrozen. CodeBERT must stay completely frozen in this experiment. |
+| `Could not load 'Salesforce/codet5-small'` / `'microsoft/unixcoder-base'` | Same as for CodeBERT: internet connection or Hugging Face availability. |
+| CodeT5 loss becomes `nan` | It should not, because CodeT5 runs in fp32 (`use_amp: False` in `config.ENCODER_SPECS`). Make sure this was not changed. |
 | A step says "already trained - skipping" | That is intended (restart-safe). Add `--force` to retrain. |
 | A model shows as `stale` in the comparison | Its predictions were made on a different test split. Retrain it with `--force`. |
 | Colab session ended and files disappeared | The project was in `/content`, which is temporary. Keep it on Google Drive, or download `outputs.zip` (cell 15). |

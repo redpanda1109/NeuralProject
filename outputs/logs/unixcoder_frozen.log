@@ -1,0 +1,33 @@
+16:52:43 | ======================================================================
+16:52:43 | PHASE 4 - unixcoder: FROZEN encoder + trainable classification head
+16:52:43 | ======================================================================
+16:52:48 |   Encoder parameters: trainable=0 frozen=125,339,136 (must be 0 trainable)
+16:52:51 |   train     : 2710 examples, mean length 434 tokens
+16:52:53 |   validation: 592 examples, mean length 459 tokens
+16:52:54 |   test      : 592 examples, mean length 434 tokens
+16:52:54 |   Mixed precision (fp16) for feature extraction: True
+16:52:54 |   Extracting train features ...
+16:53:13 |   Extracting validation features ...
+16:53:18 |   Extracting test features ...
+16:53:22 |   Classification head trainable parameters: 393,729
+16:53:22 |   epoch   1 | train loss 0.7784 | val loss 0.6868 | val acc 0.5642 | 0s  <- best, checkpoint saved
+16:53:22 |   epoch   2 | train loss 0.6824 | val loss 0.6754 | val acc 0.5811 | 0s  <- best, checkpoint saved
+16:53:22 |   epoch   3 | train loss 0.6681 | val loss 0.6607 | val acc 0.6301 | 0s  <- best, checkpoint saved
+16:53:22 |   epoch   4 | train loss 0.6502 | val loss 0.6315 | val acc 0.6639 | 0s  <- best, checkpoint saved
+16:53:23 |   epoch   5 | train loss 0.6301 | val loss 0.6179 | val acc 0.6807 | 0s  <- best, checkpoint saved
+16:53:23 |   epoch   6 | train loss 0.6095 | val loss 0.6011 | val acc 0.6943 | 0s  <- best, checkpoint saved
+16:53:23 |   epoch   7 | train loss 0.5817 | val loss 0.5953 | val acc 0.6943 | 0s  <- best, checkpoint saved
+16:53:23 |   epoch   8 | train loss 0.5684 | val loss 0.5902 | val acc 0.7027 | 0s  <- best, checkpoint saved
+16:53:23 |   epoch   9 | train loss 0.5633 | val loss 0.5778 | val acc 0.6993 | 0s  <- best, checkpoint saved
+16:53:23 |   epoch  10 | train loss 0.5393 | val loss 0.5986 | val acc 0.6909 | 0s
+16:53:24 |   epoch  11 | train loss 0.5289 | val loss 0.6142 | val acc 0.6655 | 0s
+16:53:24 |   epoch  12 | train loss 0.5143 | val loss 0.5850 | val acc 0.6909 | 0s
+16:53:24 |   epoch  13 | train loss 0.4961 | val loss 0.5814 | val acc 0.7162 | 0s
+16:53:24 |   epoch  14 | train loss 0.4857 | val loss 0.5888 | val acc 0.7078 | 0s
+16:53:24 |   epoch  15 | train loss 0.4707 | val loss 0.5847 | val acc 0.7179 | 0s
+16:53:24 |   epoch  16 | train loss 0.4599 | val loss 0.5988 | val acc 0.6993 | 0s
+16:53:25 |   epoch  17 | train loss 0.4460 | val loss 0.6329 | val acc 0.7111 | 0s
+16:53:25 |   epoch  18 | train loss 0.4478 | val loss 0.6744 | val acc 0.6689 | 0s
+16:53:25 |   epoch  19 | train loss 0.4604 | val loss 0.6106 | val acc 0.7179 | 0s
+16:53:25 |   Early stopping: no validation improvement for 10 epochs.
+16:53:25 |   Loaded best checkpoint from epoch 9 (val loss 0.5778).

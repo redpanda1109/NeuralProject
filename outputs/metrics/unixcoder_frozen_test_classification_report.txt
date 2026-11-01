@@ -1,0 +1,10 @@
+unixcoder_frozen - test split (positive class = 1 = hallucinated)
+
+              precision    recall  f1-score   support
+
+     correct     0.6934    0.6723    0.6827       296
+hallucinated     0.6820    0.7027    0.6922       296
+
+    accuracy                         0.6875       592
+   macro avg     0.6877    0.6875    0.6874       592
+weighted avg     0.6877    0.6875    0.6874       592

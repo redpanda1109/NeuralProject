@@ -40,3 +40,5 @@
 11:06:00 |   epoch  29 | train loss 0.3919 | val loss 0.5291 | val acc 0.7449 | 0s
 11:06:00 |   Early stopping: no validation improvement for 10 epochs.
 11:06:00 |   Loaded best checkpoint from epoch 19 (val loss 0.5057).
+16:06:13 | graphcodebert_frozen already trained - skipping (use --force to retrain).
+16:49:58 | graphcodebert_frozen already trained - skipping (use --force to retrain).

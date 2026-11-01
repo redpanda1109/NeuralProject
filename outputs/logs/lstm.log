@@ -19,3 +19,5 @@
 11:02:58 |   epoch   8 | train loss 0.5368 | val loss 0.7157 | val acc 0.6605 | 2s
 11:02:58 |   Early stopping: no validation improvement for 4 epochs.
 11:02:58 |   Loaded best checkpoint from epoch 4 (val loss 0.6593).
+16:05:29 | LSTM already trained - skipping (use --force to retrain).
+16:49:40 | LSTM already trained - skipping (use --force to retrain).

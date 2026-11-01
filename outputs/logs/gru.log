@@ -19,3 +19,5 @@
 11:02:33 |   epoch   8 | train loss 0.5624 | val loss 0.6771 | val acc 0.6791 | 2s
 11:02:33 |   Early stopping: no validation improvement for 4 epochs.
 11:02:33 |   Loaded best checkpoint from epoch 4 (val loss 0.6582).
+16:05:28 | GRU already trained - skipping (use --force to retrain).
+16:49:39 | GRU already trained - skipping (use --force to retrain).
