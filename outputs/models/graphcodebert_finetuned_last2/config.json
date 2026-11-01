@@ -1,0 +1,33 @@
+{
+  "pretrained_model": "microsoft/graphcodebert-base",
+  "input": {
+    "max_len": 512,
+    "completion_max_tokens": 160
+  },
+  "pooling": "mean+max over completion tokens",
+  "phase": 5,
+  "unfrozen_last_n_layers": 2,
+  "finetune": {
+    "unfreeze_last_n_layers": 2,
+    "encoder_learning_rate": 2e-05,
+    "head_learning_rate": 0.0001,
+    "weight_decay": 0.01,
+    "batch_size": 16,
+    "grad_accumulation_steps": 2,
+    "warmup_fraction": 0.1,
+    "max_epochs": 10,
+    "patience": 3,
+    "max_grad_norm": 1.0,
+    "init_head_from_frozen": true
+  },
+  "layer_check": {
+    "trainable": 14569473,
+    "frozen": 109879296,
+    "trainable_blocks": [
+      "backbone.encoder.layer.10",
+      "backbone.encoder.layer.11",
+      "head"
+    ]
+  },
+  "checkpoint_note": "best_model.pt holds ONLY the trained parameters (last layers + head); load the public pretrained model first, then this file with strict=False."
+}

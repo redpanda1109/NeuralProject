@@ -1,0 +1,21 @@
+11:02:34 | ======================================================================
+11:02:34 | PHASE 3 - LSTM classifier
+11:02:34 | ======================================================================
+11:02:38 |   Vocabulary (train only): 6271 tokens | <unk> rate: train=0.01%, validation=1.89%, test=1.82%
+11:02:38 |   Model: RNNClassifier(
+  (embedding): Embedding(6271, 128, padding_idx=0)
+  (rnn): LSTM(128, 128, batch_first=True, bidirectional=True)
+  (dropout): Dropout(p=0.3, inplace=False)
+  (classifier): Linear(in_features=512, out_features=1, bias=True)
+)
+  Trainable parameters: 1,067,393
+11:02:40 |   epoch   1 | train loss 0.6913 | val loss 0.6759 | val acc 0.5743 | 3s  <- best, checkpoint saved
+11:02:43 |   epoch   2 | train loss 0.6745 | val loss 0.6640 | val acc 0.6030 | 2s  <- best, checkpoint saved
+11:02:45 |   epoch   3 | train loss 0.6583 | val loss 0.6667 | val acc 0.6030 | 2s
+11:02:48 |   epoch   4 | train loss 0.6435 | val loss 0.6593 | val acc 0.6284 | 2s  <- best, checkpoint saved
+11:02:51 |   epoch   5 | train loss 0.6167 | val loss 0.6635 | val acc 0.6520 | 3s
+11:02:53 |   epoch   6 | train loss 0.5900 | val loss 0.6770 | val acc 0.6740 | 3s
+11:02:56 |   epoch   7 | train loss 0.5750 | val loss 0.7178 | val acc 0.6740 | 2s
+11:02:58 |   epoch   8 | train loss 0.5368 | val loss 0.7157 | val acc 0.6605 | 2s
+11:02:58 |   Early stopping: no validation improvement for 4 epochs.
+11:02:58 |   Loaded best checkpoint from epoch 4 (val loss 0.6593).

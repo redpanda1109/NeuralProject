@@ -1,0 +1,10 @@
+logistic_regression - validation split (positive class = 1 = hallucinated)
+
+              precision    recall  f1-score   support
+
+     correct     0.7922    0.6182    0.6945       296
+hallucinated     0.6870    0.8378    0.7549       296
+
+    accuracy                         0.7280       592
+   macro avg     0.7396    0.7280    0.7247       592
+weighted avg     0.7396    0.7280    0.7247       592

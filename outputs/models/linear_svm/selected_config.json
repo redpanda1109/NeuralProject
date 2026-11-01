@@ -1,0 +1,9 @@
+{
+  "task": "binary",
+  "classifier": "linear_svm",
+  "view": "completion",
+  "features": "char",
+  "C": 1.0,
+  "n_features": 36982,
+  "val_macro_f1": 0.7185757185757186
+}

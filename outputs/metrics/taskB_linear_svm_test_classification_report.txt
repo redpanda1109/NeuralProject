@@ -1,0 +1,12 @@
+Task B (4-class category) - linear_svm - test
+
+                   precision    recall  f1-score   support
+
+           import     0.9753    1.0000    0.9875        79
+           method     0.6825    0.6418    0.6615        67
+        parameter     0.7308    0.8636    0.7917        66
+undefinedvariable     0.7838    0.6905    0.7342        84
+
+         accuracy                         0.8007       296
+        macro avg     0.7931    0.7990    0.7937       296
+     weighted avg     0.8002    0.8007    0.7982       296

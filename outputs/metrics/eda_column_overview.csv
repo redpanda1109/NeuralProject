@@ -1,0 +1,14 @@
+column,dtype,missing,missing_%,unique_values
+benchmark_id,object,0,0.0,1947
+image_tag,object,0,0.0,1947
+language,object,0,0.0,7
+file_path,object,0,0.0,507
+hallucination_type,object,0,0.0,4
+prompt,object,125,6.42,921
+suffix,object,12,0.62,1035
+golden_completion,object,0,0.0,906
+hallucinated_completion,object,0,0.0,1816
+error_message,object,0,0.0,1453
+metadata,object,0,0.0,1947
+license,object,0,0.0,27
+repo_url,object,3,0.15,319

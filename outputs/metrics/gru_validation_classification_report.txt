@@ -1,0 +1,10 @@
+gru - validation split (positive class = 1 = hallucinated)
+
+              precision    recall  f1-score   support
+
+     correct     0.6226    0.6689    0.6450       296
+hallucinated     0.6423    0.5946    0.6175       296
+
+    accuracy                         0.6318       592
+   macro avg     0.6325    0.6318    0.6312       592
+weighted avg     0.6325    0.6318    0.6312       592

@@ -1,0 +1,28 @@
+{
+  "group_by": "context_id",
+  "seed": 42,
+  "sizes_benchmark_items": {
+    "train": 1355,
+    "validation": 296,
+    "test": 296
+  },
+  "benchmark_id_overlap": {
+    "train & validation": 0,
+    "train & test": 0,
+    "validation & test": 0
+  },
+  "context_overlap": {
+    "train & validation": 0,
+    "train & test": 0,
+    "validation & test": 0
+  },
+  "identical_golden_overlap": {
+    "validation": 0,
+    "test": 0
+  },
+  "repo_url_overlap": {
+    "train & validation": 86,
+    "train & test": 89,
+    "validation & test": 36
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "task": "binary",
+  "classifier": "logistic_regression",
+  "view": "completion",
+  "features": "char",
+  "C": 10.0,
+  "n_features": 36982,
+  "val_macro_f1": 0.7247219406248284
+}

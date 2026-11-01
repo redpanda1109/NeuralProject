@@ -1,0 +1,21 @@
+{
+  "pretrained_model": "microsoft/codebert-base",
+  "input": {
+    "max_len": 512,
+    "completion_max_tokens": 160
+  },
+  "pooling": "mean+max over completion tokens",
+  "phase": 4,
+  "encoder": "all layers frozen (unchanged pretrained weights)",
+  "head_checkpoint": "head.pt",
+  "head": {
+    "extract_batch_size": 32,
+    "head_hidden_dim": 256,
+    "head_dropout": 0.1,
+    "batch_size": 64,
+    "learning_rate": 0.001,
+    "weight_decay": 0.0001,
+    "max_epochs": 100,
+    "patience": 10
+  }
+}

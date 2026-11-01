@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+venv/
+.venv/
+
+# Large / regenerable artefacts
+outputs/features/
+outputs/models/**/*.pt
+outputs/models/**/frozen_encoder/
+outputs.zip

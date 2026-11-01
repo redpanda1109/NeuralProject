@@ -1,0 +1,28 @@
+11:10:42 | ======================================================================
+11:10:42 | PHASE 5 - graphcodebert: fine-tune ONLY the final 2 encoder layers + head
+11:10:42 | ======================================================================
+11:10:49 |   Head initialised from the Phase 4 head: /content/drive/MyDrive/NeuralProject/outputs/models/graphcodebert_frozen/head.pt
+11:10:49 |   Encoder layers: 12  |  unfrozen: the last 2 (layers 10-11)
+11:10:49 |   Trainable parameters: 14,569,473
+11:10:49 |   Frozen parameters   : 109,879,296
+11:10:49 |   Trainable blocks    : ['backbone.encoder.layer.10', 'backbone.encoder.layer.11', 'head']
+11:10:49 |   Verification passed: only the final layers + head are trainable; embeddings and earlier layers are frozen.
+11:10:53 |   train     : 2710 examples, mean length 456 tokens
+11:10:54 |   validation: 592 examples, mean length 472 tokens
+11:10:54 |   test      : 592 examples, mean length 462 tokens
+11:10:55 |   batch size 16 x accumulation 2 = effective 32 | mixed precision: True
+11:11:31 |   epoch   1 | train loss 0.4811 | val loss 0.5133 | val acc 0.7483 | 37s  <- best, checkpoint saved
+11:12:09 |   epoch   2 | train loss 0.4756 | val loss 0.4959 | val acc 0.7618 | 38s  <- best, checkpoint saved
+11:12:45 |   epoch   3 | train loss 0.4379 | val loss 0.5100 | val acc 0.7500 | 36s
+11:13:23 |   epoch   4 | train loss 0.4149 | val loss 0.5039 | val acc 0.7686 | 37s
+11:13:59 |   epoch   5 | train loss 0.3879 | val loss 0.5097 | val acc 0.7652 | 36s
+11:13:59 |   Early stopping: no validation improvement for 3 epochs.
+11:13:59 |   Loaded best checkpoint from epoch 2 (val loss 0.4959).
+11:14:10 |   metric       frozen   last-2   change
+11:14:10 |   accuracy     0.7399   0.7466  +0.0068
+11:14:10 |   precision    0.7432   0.7786  +0.0355
+11:14:10 |   recall       0.7331   0.6892  -0.0439
+11:14:10 |   f1           0.7381   0.7312  -0.0069
+11:14:10 |   roc_auc      0.8180   0.8359  +0.0180
+11:14:10 |   pr_auc       0.7892   0.8045  +0.0153
+11:14:10 |   Run `python -m src.evaluation` for charts and confidence intervals.

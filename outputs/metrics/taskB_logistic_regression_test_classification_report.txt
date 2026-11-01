@@ -1,0 +1,12 @@
+Task B (4-class category) - logistic_regression - test
+
+                   precision    recall  f1-score   support
+
+           import     0.9753    1.0000    0.9875        79
+           method     0.6984    0.6567    0.6769        67
+        parameter     0.7571    0.8030    0.7794        66
+undefinedvariable     0.7561    0.7381    0.7470        84
+
+         accuracy                         0.8041       296
+        macro avg     0.7967    0.7995    0.7977       296
+     weighted avg     0.8018    0.8041    0.8025       296

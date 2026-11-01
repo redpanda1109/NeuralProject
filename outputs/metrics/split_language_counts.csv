@@ -1,0 +1,8 @@
+language,train,validation,test
+typescript,300,63,57
+python,252,63,55
+go,207,42,42
+rust,176,34,42
+csharp,171,37,38
+java,163,40,40
+cpp,86,17,22

@@ -1,0 +1,21 @@
+11:02:02 | ======================================================================
+11:02:02 | PHASE 3 - GRU classifier
+11:02:02 | ======================================================================
+11:02:05 |   Vocabulary (train only): 6271 tokens | <unk> rate: train=0.01%, validation=1.89%, test=1.82%
+11:02:05 |   Model: RNNClassifier(
+  (embedding): Embedding(6271, 128, padding_idx=0)
+  (rnn): GRU(128, 128, batch_first=True, bidirectional=True)
+  (dropout): Dropout(p=0.3, inplace=False)
+  (classifier): Linear(in_features=512, out_features=1, bias=True)
+)
+  Trainable parameters: 1,001,345
+11:02:16 |   epoch   1 | train loss 0.6887 | val loss 0.6723 | val acc 0.5693 | 4s  <- best, checkpoint saved
+11:02:18 |   epoch   2 | train loss 0.6708 | val loss 0.6660 | val acc 0.6284 | 2s  <- best, checkpoint saved
+11:02:20 |   epoch   3 | train loss 0.6601 | val loss 0.6682 | val acc 0.6081 | 3s
+11:02:24 |   epoch   4 | train loss 0.6521 | val loss 0.6582 | val acc 0.6318 | 3s  <- best, checkpoint saved
+11:02:26 |   epoch   5 | train loss 0.6251 | val loss 0.6598 | val acc 0.6503 | 2s
+11:02:28 |   epoch   6 | train loss 0.6035 | val loss 0.6678 | val acc 0.6791 | 2s
+11:02:31 |   epoch   7 | train loss 0.5886 | val loss 0.7023 | val acc 0.6520 | 2s
+11:02:33 |   epoch   8 | train loss 0.5624 | val loss 0.6771 | val acc 0.6791 | 2s
+11:02:33 |   Early stopping: no validation improvement for 4 epochs.
+11:02:33 |   Loaded best checkpoint from epoch 4 (val loss 0.6582).

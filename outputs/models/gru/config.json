@@ -1,0 +1,16 @@
+{
+  "max_len": 400,
+  "completion_max_tokens": 128,
+  "min_freq": 2,
+  "max_vocab_size": 30000,
+  "embedding_dim": 128,
+  "hidden_dim": 128,
+  "num_layers": 1,
+  "bidirectional": true,
+  "dropout": 0.3,
+  "batch_size": 64,
+  "learning_rate": 0.001,
+  "weight_decay": 1e-05,
+  "max_epochs": 20,
+  "patience": 4
+}

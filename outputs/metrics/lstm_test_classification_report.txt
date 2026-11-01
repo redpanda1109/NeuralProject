@@ -1,0 +1,10 @@
+lstm - test split (positive class = 1 = hallucinated)
+
+              precision    recall  f1-score   support
+
+     correct     0.6335    0.7534    0.6883       296
+hallucinated     0.6958    0.5642    0.6231       296
+
+    accuracy                         0.6588       592
+   macro avg     0.6647    0.6588    0.6557       592
+weighted avg     0.6647    0.6588    0.6557       592

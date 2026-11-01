@@ -1,0 +1,10 @@
+linear_svm - test split (positive class = 1 = hallucinated)
+
+              precision    recall  f1-score   support
+
+     correct     0.7778    0.6149    0.6868       296
+hallucinated     0.6816    0.8243    0.7462       296
+
+    accuracy                         0.7196       592
+   macro avg     0.7297    0.7196    0.7165       592
+weighted avg     0.7297    0.7196    0.7165       592

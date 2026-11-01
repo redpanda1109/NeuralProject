@@ -1,0 +1,10 @@
+graphcodebert_frozen - test split (positive class = 1 = hallucinated)
+
+              precision    recall  f1-score   support
+
+     correct     0.7367    0.7466    0.7416       296
+hallucinated     0.7432    0.7331    0.7381       296
+
+    accuracy                         0.7399       592
+   macro avg     0.7399    0.7399    0.7399       592
+weighted avg     0.7399    0.7399    0.7399       592

@@ -1,0 +1,10 @@
+codebert_finetuned_last2 - test split (positive class = 1 = hallucinated)
+
+              precision    recall  f1-score   support
+
+     correct     0.7287    0.7804    0.7537       296
+hallucinated     0.7636    0.7095    0.7356       296
+
+    accuracy                         0.7449       592
+   macro avg     0.7462    0.7449    0.7446       592
+weighted avg     0.7462    0.7449    0.7446       592

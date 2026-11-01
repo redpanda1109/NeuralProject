@@ -1,0 +1,119 @@
+15:26:50 | ======================================================================
+15:26:50 | PHASE 2 - TASK A (binary): TF-IDF baselines
+15:26:50 | ======================================================================
+15:27:02 |   train     : 2710 examples (50% hallucinated)
+15:27:02 |   validation: 592 examples (50% hallucinated)
+15:27:02 |   test      : 592 examples (50% hallucinated)
+15:27:03 |   binary logistic_regression  view=completion          features=word      C=0.1    val macro-F1=0.5904
+15:27:03 |   binary logistic_regression  view=completion          features=word      C=1.0    val macro-F1=0.6058
+15:27:04 |   binary logistic_regression  view=completion          features=word      C=10.0   val macro-F1=0.6031
+15:27:04 |   binary logistic_regression  view=completion          features=word      C=100.0  val macro-F1=0.5916
+15:27:05 |   binary linear_svm           view=completion          features=word      C=0.01   val macro-F1=0.5886
+15:27:05 |   binary linear_svm           view=completion          features=word      C=0.1    val macro-F1=0.6087
+15:27:05 |   binary linear_svm           view=completion          features=word      C=1.0    val macro-F1=0.6160
+15:27:05 |   binary linear_svm           view=completion          features=word      C=10.0   val macro-F1=0.6139
+15:27:08 |   binary logistic_regression  view=completion          features=char      C=0.1    val macro-F1=0.6693
+15:27:08 |   binary logistic_regression  view=completion          features=char      C=1.0    val macro-F1=0.7095
+15:27:09 |   binary logistic_regression  view=completion          features=char      C=10.0   val macro-F1=0.7247
+15:27:10 |   binary logistic_regression  view=completion          features=char      C=100.0  val macro-F1=0.6988
+15:27:10 |   binary linear_svm           view=completion          features=char      C=0.01   val macro-F1=0.6693
+15:27:10 |   binary linear_svm           view=completion          features=char      C=0.1    val macro-F1=0.7078
+15:27:10 |   binary linear_svm           view=completion          features=char      C=1.0    val macro-F1=0.7186
+15:27:13 |   binary linear_svm           view=completion          features=char      C=10.0   val macro-F1=0.7082
+15:27:18 |   binary logistic_regression  view=completion          features=word+char C=0.1    val macro-F1=0.6588
+15:27:18 |   binary logistic_regression  view=completion          features=word+char C=1.0    val macro-F1=0.6658
+15:27:20 |   binary logistic_regression  view=completion          features=word+char C=10.0   val macro-F1=0.6443
+15:27:22 |   binary logistic_regression  view=completion          features=word+char C=100.0  val macro-F1=0.6326
+15:27:22 |   binary linear_svm           view=completion          features=word+char C=0.01   val macro-F1=0.6568
+15:27:22 |   binary linear_svm           view=completion          features=word+char C=0.1    val macro-F1=0.6648
+15:27:23 |   binary linear_svm           view=completion          features=word+char C=1.0    val macro-F1=0.6679
+15:27:27 |   binary linear_svm           view=completion          features=word+char C=10.0   val macro-F1=0.6500
+15:27:30 |   binary logistic_regression  view=completion_context  features=word      C=0.1    val macro-F1=0.5595
+15:27:31 |   binary logistic_regression  view=completion_context  features=word      C=1.0    val macro-F1=0.5862
+15:27:31 |   binary logistic_regression  view=completion_context  features=word      C=10.0   val macro-F1=0.5901
+15:27:34 |   binary logistic_regression  view=completion_context  features=word      C=100.0  val macro-F1=0.5906
+15:27:34 |   binary linear_svm           view=completion_context  features=word      C=0.01   val macro-F1=0.5677
+15:27:34 |   binary linear_svm           view=completion_context  features=word      C=0.1    val macro-F1=0.5860
+15:27:34 |   binary linear_svm           view=completion_context  features=word      C=1.0    val macro-F1=0.5863
+15:27:36 |   binary linear_svm           view=completion_context  features=word      C=10.0   val macro-F1=0.5946
+15:27:50 |   binary logistic_regression  view=completion_context  features=char      C=0.1    val macro-F1=0.5792
+15:27:52 |   binary logistic_regression  view=completion_context  features=char      C=1.0    val macro-F1=0.6135
+15:27:55 |   binary logistic_regression  view=completion_context  features=char      C=10.0   val macro-F1=0.6113
+15:28:02 |   binary logistic_regression  view=completion_context  features=char      C=100.0  val macro-F1=0.6114
+15:28:02 |   binary linear_svm           view=completion_context  features=char      C=0.01   val macro-F1=0.5786
+15:28:02 |   binary linear_svm           view=completion_context  features=char      C=0.1    val macro-F1=0.6048
+15:28:04 |   binary linear_svm           view=completion_context  features=char      C=1.0    val macro-F1=0.6077
+15:28:17 |   binary linear_svm           view=completion_context  features=char      C=10.0   val macro-F1=0.6255
+15:28:29 |   binary logistic_regression  view=completion_context  features=word+char C=0.1    val macro-F1=0.5706
+15:28:29 |   binary logistic_regression  view=completion_context  features=word+char C=1.0    val macro-F1=0.5929
+15:28:30 |   binary logistic_regression  view=completion_context  features=word+char C=10.0   val macro-F1=0.6256
+15:28:33 |   binary logistic_regression  view=completion_context  features=word+char C=100.0  val macro-F1=0.6175
+15:28:33 |   binary linear_svm           view=completion_context  features=word+char C=0.01   val macro-F1=0.5804
+15:28:33 |   binary linear_svm           view=completion_context  features=word+char C=0.1    val macro-F1=0.5929
+15:28:34 |   binary linear_svm           view=completion_context  features=word+char C=1.0    val macro-F1=0.6190
+15:28:39 |   binary linear_svm           view=completion_context  features=word+char C=10.0   val macro-F1=0.6076
+15:28:39 |   BEST binary logistic_regression: view=completion features=char C=10.0 (val macro-F1=0.7247)
+15:28:39 |   BEST binary linear_svm: view=completion features=char C=1.0 (val macro-F1=0.7186)
+15:28:40 | Saved logistic_regression to C:\Laavya\AMRITA CLG\SEMESTER 5\DL & NN\NeuralProject\outputs\models\logistic_regression
+15:28:42 | Saved linear_svm to C:\Laavya\AMRITA CLG\SEMESTER 5\DL & NN\NeuralProject\outputs\models\linear_svm
+15:28:42 | ======================================================================
+15:28:42 | TASK B (4-class hallucination CATEGORY - NOT the binary detection task)
+15:28:42 | ======================================================================
+15:28:42 |   Test-set majority-class share (a trivial reference): 0.284
+15:28:42 |   category logistic_regression  view=completion          features=word      C=0.1    val macro-F1=0.6470
+15:28:42 |   category logistic_regression  view=completion          features=word      C=1.0    val macro-F1=0.7691
+15:28:43 |   category logistic_regression  view=completion          features=word      C=10.0   val macro-F1=0.7831
+15:28:43 |   category logistic_regression  view=completion          features=word      C=100.0  val macro-F1=0.7794
+15:28:43 |   category linear_svm           view=completion          features=word      C=0.01   val macro-F1=0.6063
+15:28:43 |   category linear_svm           view=completion          features=word      C=0.1    val macro-F1=0.7574
+15:28:43 |   category linear_svm           view=completion          features=word      C=1.0    val macro-F1=0.7690
+15:28:43 |   category linear_svm           view=completion          features=word      C=10.0   val macro-F1=0.7700
+15:28:44 |   category logistic_regression  view=completion          features=char      C=0.1    val macro-F1=0.5277
+15:28:45 |   category logistic_regression  view=completion          features=char      C=1.0    val macro-F1=0.7593
+15:28:46 |   category logistic_regression  view=completion          features=char      C=10.0   val macro-F1=0.7846
+15:28:47 |   category logistic_regression  view=completion          features=char      C=100.0  val macro-F1=0.7861
+15:28:47 |   category linear_svm           view=completion          features=char      C=0.01   val macro-F1=0.4754
+15:28:48 |   category linear_svm           view=completion          features=char      C=0.1    val macro-F1=0.7514
+15:28:48 |   category linear_svm           view=completion          features=char      C=1.0    val macro-F1=0.7900
+15:28:48 |   category linear_svm           view=completion          features=char      C=10.0   val macro-F1=0.7882
+15:28:49 |   category logistic_regression  view=completion          features=word+char C=0.1    val macro-F1=0.7001
+15:28:50 |   category logistic_regression  view=completion          features=word+char C=1.0    val macro-F1=0.7952
+15:28:51 |   category logistic_regression  view=completion          features=word+char C=10.0   val macro-F1=0.7952
+15:28:52 |   category logistic_regression  view=completion          features=word+char C=100.0  val macro-F1=0.7899
+15:28:52 |   category linear_svm           view=completion          features=word+char C=0.01   val macro-F1=0.6330
+15:28:52 |   category linear_svm           view=completion          features=word+char C=0.1    val macro-F1=0.7876
+15:28:53 |   category linear_svm           view=completion          features=word+char C=1.0    val macro-F1=0.7933
+15:28:53 |   category linear_svm           view=completion          features=word+char C=10.0   val macro-F1=0.7928
+15:28:54 |   category logistic_regression  view=completion_context  features=word      C=0.1    val macro-F1=0.3479
+15:28:54 |   category logistic_regression  view=completion_context  features=word      C=1.0    val macro-F1=0.5432
+15:28:56 |   category logistic_regression  view=completion_context  features=word      C=10.0   val macro-F1=0.6329
+15:28:59 |   category logistic_regression  view=completion_context  features=word      C=100.0  val macro-F1=0.6136
+15:28:59 |   category linear_svm           view=completion_context  features=word      C=0.01   val macro-F1=0.3479
+15:28:59 |   category linear_svm           view=completion_context  features=word      C=0.1    val macro-F1=0.5088
+15:28:59 |   category linear_svm           view=completion_context  features=word      C=1.0    val macro-F1=0.6182
+15:29:00 |   category linear_svm           view=completion_context  features=word      C=10.0   val macro-F1=0.6060
+15:29:03 |   category logistic_regression  view=completion_context  features=char      C=0.1    val macro-F1=0.3350
+15:29:06 |   category logistic_regression  view=completion_context  features=char      C=1.0    val macro-F1=0.5479
+15:29:12 |   category logistic_regression  view=completion_context  features=char      C=10.0   val macro-F1=0.6128
+15:29:22 |   category logistic_regression  view=completion_context  features=char      C=100.0  val macro-F1=0.6493
+15:29:22 |   category linear_svm           view=completion_context  features=char      C=0.01   val macro-F1=0.3350
+15:29:23 |   category linear_svm           view=completion_context  features=char      C=0.1    val macro-F1=0.4903
+15:29:23 |   category linear_svm           view=completion_context  features=char      C=1.0    val macro-F1=0.6489
+15:29:28 |   category linear_svm           view=completion_context  features=char      C=10.0   val macro-F1=0.6403
+15:29:32 |   category logistic_regression  view=completion_context  features=word+char C=0.1    val macro-F1=0.3573
+15:29:35 |   category logistic_regression  view=completion_context  features=word+char C=1.0    val macro-F1=0.5927
+15:29:42 |   category logistic_regression  view=completion_context  features=word+char C=10.0   val macro-F1=0.6494
+15:29:57 |   category logistic_regression  view=completion_context  features=word+char C=100.0  val macro-F1=0.6765
+15:29:57 |   category linear_svm           view=completion_context  features=word+char C=0.01   val macro-F1=0.3334
+15:29:57 |   category linear_svm           view=completion_context  features=word+char C=0.1    val macro-F1=0.5577
+15:29:58 |   category linear_svm           view=completion_context  features=word+char C=1.0    val macro-F1=0.6537
+15:30:08 |   category linear_svm           view=completion_context  features=word+char C=10.0   val macro-F1=0.6626
+15:30:08 |   BEST category logistic_regression: view=completion features=word+char C=1.0 (val macro-F1=0.7952)
+15:30:08 |   BEST category linear_svm: view=completion features=word+char C=1.0 (val macro-F1=0.7933)
+15:30:08 |   [taskB logistic_regression] validation accuracy=0.7939 macro-F1=0.7952
+15:30:08 |   [taskB logistic_regression] test       accuracy=0.8041 macro-F1=0.7977
+15:30:09 |   [taskB linear_svm] validation accuracy=0.7905 macro-F1=0.7933
+15:30:09 |   [taskB linear_svm] test       accuracy=0.8007 macro-F1=0.7937
+15:30:10 | Task B results -> C:\Laavya\AMRITA CLG\SEMESTER 5\DL & NN\NeuralProject\outputs\metrics\taskB_category_results.csv
+11:01:44 | Task A baselines already trained - skipping (use --force to retrain).
+11:01:44 | Task B baselines already trained - skipping (use --force to retrain).
